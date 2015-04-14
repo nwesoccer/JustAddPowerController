@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "~1.0.1",
     "express": "^4.12.3",
-    "body-parser": "~1.0.1"
+    "q": "^1.2.0",
+    "telnet-client": "0.0.8"
   }
 }
