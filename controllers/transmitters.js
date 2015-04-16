@@ -1,33 +1,19 @@
-var config       = require('config');
-var q            = require('q');
-var appRoot      = require('app-root-path');
+var appRoot     = require('app-root-path');
+var config      = require('config');
+
 var communicator = appRoot.require('/communicators/' + config.get('communicator') + '.js');
-
-var Datastore = require('nedb');
-
-var db = { transmitters: new Datastore({
-        filename: appRoot.resolve('/database/transmitters.table'),
-        autoload: true,
-        onload: function(error) {
-            if (error) {
-                console.log('Error', error);
-            } else {
-                console.log('Transmitter database loaded.');
-            }
-        }
-    })
-};
-
-db.insertTransmitter = q.nbind(db.transmitters.insert, db.transmitters);
-db.findTransmitter = q.nbind(db.transmitters.findOne, db.transmitters);
-db.findTransmitters = q.nbind(db.transmitters.find, db.transmitters);
+var db = appRoot.require('/database/database.js');
 
 var transmitters = {
 
     getAll: function(req, res) {
         db.findTransmitters({})
             .then(function(transmitters) {
-                res.json(transmitters);
+                if (!transmitters || transmitters.length === 0) {
+                    res.json([]);
+                } else {
+                    res.json(transmitters);
+                }
             })
             .catch(function(error) {
                 res.status(500).send({ error: error });
@@ -37,7 +23,11 @@ var transmitters = {
     getOne: function(req, res) {
         db.findTransmitter({ _id: parseInt(req.params.id) })
             .then(function(transmitter) {
-                res.json(transmitter);
+                if (!transmitter) {
+                    res.status(404).send({ error: 'Transmitter not found.' });
+                } else {
+                    res.json(transmitter);
+                }
             })
             .catch(function(error) {
                 res.status(500).send({ error: error });

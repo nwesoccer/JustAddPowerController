@@ -1,7 +1,7 @@
+var appRoot      = require('app-root-path');
+var bodyParser = require('body-parser');
 var express    = require('express');
 var app        = express();
-var bodyParser = require('body-parser');
-var appRoot      = require('app-root-path');
 
 var transmitters = appRoot.require('/controllers/transmitters.js');
 var receivers = appRoot.require('/controllers/receivers.js');
@@ -28,7 +28,6 @@ router.get('/receivers/:id', receivers.getOne);
 router.post('/receivers', receivers.create);
 router.put('/receivers/:id', receivers.update);
 router.delete('/receivers/:id', receivers.delete);
-
 
 app.use('', router);
 app.listen(port);

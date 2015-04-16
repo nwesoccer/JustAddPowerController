@@ -1,33 +1,19 @@
-var config       = require('config');
-var q            = require('q');
-var appRoot      = require('app-root-path');
+var appRoot     = require('app-root-path');
+var config      = require('config');
+
 var communicator = appRoot.require('/communicators/' + config.get('communicator') + '.js');
-
-var Datastore = require('nedb');
-
-var db = { receivers: new Datastore({
-        filename: appRoot.resolve('/database/receivers.table'),
-        autoload: true,
-        onload: function(error) {
-            if (error) {
-                console.log('Error', error);
-            } else {
-                console.log('Receiver database loaded.');
-            }
-        }
-    })
-};
-
-db.insertReceiver = q.nbind(db.receivers.insert, db.receivers);
-db.findReceiver = q.nbind(db.receivers.findOne, db.receivers);
-db.findReceivers = q.nbind(db.receivers.find, db.receivers);
+var db = appRoot.require('/database/database.js');
 
 var receivers = {
 
     getAll: function(req, res) {
         db.findReceivers({})
             .then(function(receivers) {
-                res.json(receivers);
+                if (!receivers || receivers.length === 0) {
+                    res.json([]);
+                } else {
+                    res.json(receivers);
+                }
             })
             .catch(function(error) {
                 res.status(500).send({ error: error });
@@ -37,7 +23,11 @@ var receivers = {
     getOne: function(req, res) {
         db.findReceiver({ _id: parseInt(req.params.id) })
             .then(function(receiver) {
-                res.json(receiver);
+                if (!receiver) {
+                    res.status(404).send({ error: 'Receiver not found.' });
+                } else {
+                    res.json(receiver);
+                }
             })
             .catch(function(error) {
                 res.status(500).send({ error: error });
@@ -47,7 +37,11 @@ var receivers = {
     getForTransmitter: function(req, res) {
         db.findReceivers({ transmitterId: parseInt(req.params.id) })
             .then(function(receivers) {
-                res.json(receivers);
+                if (!receivers || receivers.length === 0) {
+                    res.json([]);
+                } else {
+                    res.json(receivers);
+                }
             })
             .catch(function(error) {
                 res.status(500).send({ error: error });
