@@ -1,7 +1,7 @@
 var appRoot     = require('app-root-path');
 var config      = require('config');
 
-var communicator = appRoot.require('/communicators/' + config.get('communicator') + '.js');
+var communicator = appRoot.require('/controllers/communicator.js');
 var db = appRoot.require('/database/database.js');
 
 var receivers = {
@@ -16,7 +16,7 @@ var receivers = {
                 }
             })
             .catch(function(error) {
-                res.status(500).send({ error: error });
+                res.status(500).json({ error: error });
             });
     },
 
@@ -30,7 +30,7 @@ var receivers = {
                 }
             })
             .catch(function(error) {
-                res.status(500).send({ error: error });
+                res.status(500).json({ error: error });
             });
     },
 
@@ -44,7 +44,7 @@ var receivers = {
                 }
             })
             .catch(function(error) {
-                res.status(500).send({ error: error });
+                res.status(500).json({ error: error });
             });
     },
 
@@ -54,15 +54,19 @@ var receivers = {
                 res.json(newReceiver);
             })
             .catch(function(error) {
-                res.status(500).send({ error: error });
+                res.status(500).json({ error: error });
             });
     },
 
     update: function(req, res) {
-        // var updateReceiver = req.body;
-        // var id = req.params.id;
-        // data[id] = updateReceiver // Spoof a DB call
-        // res.json(updateReceiver);
+        communicator.switchPort(req.body.port, req.body.vlan)
+            .then(function() {
+                //TODO: update database
+                res.send('Port switched to requested vlan.');
+            })
+            .catch(function(error){
+                res.status(500).json({ error: error });
+            });
     },
 
     delete: function(req, res) {

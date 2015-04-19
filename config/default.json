@@ -1,5 +1,12 @@
 {
-    "communicator": "mock",
-    "host": "127.0.0.1",
-    "port": 23
+    "switch": "cisco-catalyst-3750g",
+
+    "connectionOptions": {
+        "host": "",
+        "port": 23,
+        "username": "",
+        "password": "",
+        "shellPrompt": "",
+        "timeout": 86400000
+    }
 }

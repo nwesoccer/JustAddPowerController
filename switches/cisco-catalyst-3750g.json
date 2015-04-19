@@ -1,0 +1,24 @@
+{
+    "commands": {
+        "setup-port": [
+            "configure terminal",
+            "interface gigabitethernet 0/{port}",
+            "switchport mode access",
+            "no shutdown",
+            "spanning-tree portfast",
+            "power inline auto",
+            "switchport access vlan {vlan}",
+            "exit",
+            "exit",
+            "write"
+        ],
+
+        "switch-port": [
+            "configure terminal",
+            "interface gigabitethernet 0/{port}",
+            "switchport access vlan {vlan}",
+            "exit",
+            "exit"
+        ]
+    }
+}

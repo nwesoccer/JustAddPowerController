@@ -1,7 +1,7 @@
 var appRoot     = require('app-root-path');
 var config      = require('config');
 
-var communicator = appRoot.require('/communicators/' + config.get('communicator') + '.js');
+var communicator = appRoot.require('/controllers/communicator.js');
 var db = appRoot.require('/database/database.js');
 
 var transmitters = {
@@ -16,7 +16,7 @@ var transmitters = {
                 }
             })
             .catch(function(error) {
-                res.status(500).send({ error: error });
+                res.status(500).json({ error: error });
             });
     },
 
@@ -30,7 +30,7 @@ var transmitters = {
                 }
             })
             .catch(function(error) {
-                res.status(500).send({ error: error });
+                res.status(500).json({ error: error });
             });
     },
 
@@ -40,7 +40,7 @@ var transmitters = {
                 res.json(newTransmitter);
             })
             .catch(function(error) {
-                res.status(500).send({ error: error });
+                res.status(500).json({ error: error });
             });
     },
 
