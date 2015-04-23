@@ -2,6 +2,7 @@
     "commands": {
         "setup-port": [ ],
         "switch-port": [ ],
-        "save-config": [ ]
+        "save-config": [ ],
+        "clean-port": [ ]
     }
 }

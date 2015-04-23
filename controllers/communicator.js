@@ -67,18 +67,24 @@ module.exports = {
 
     switchPort: function(port, vlan) {
         return executeCommandSequence('switch-port', function(command) {
-            return command.replace('{port}', port).replace('{vlan}', vlan)
+            return command.replace('{port}', port).replace('{vlan}', vlan);
         });
     },
 
     setupPort: function(port, vlan) {
         return executeCommandSequence('setup-port', function(command) {
-            return command.replace('{port}', port).replace('{vlan}', vlan)
+            return command.replace('{port}', port).replace('{vlan}', vlan);
         });
     },
 
     saveConfig: function() {
         return executeCommandSequence('save-config');
+    },
+
+    cleanPort: function(port) {
+        return executeCommandSequence('clean-port', function(command) {
+            return command.replace('{port}', port);
+        });
     }
 
 };

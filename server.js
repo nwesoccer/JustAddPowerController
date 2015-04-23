@@ -5,6 +5,7 @@ var express    = require('express');
 var expressValidator = require('express-validator');
 var app        = express();
 
+var communicator = appRoot.require('/controllers/communicator.js');
 var transmitters = appRoot.require('/controllers/transmitters.js');
 var receivers = appRoot.require('/controllers/receivers.js');
 
@@ -43,11 +44,13 @@ router.delete('/receivers/:id', receivers.delete);
 
 app.use('', router);
 app.listen(port);
-console.log('API on port ' + port);
 
 // Save switch running-config to startup-config every hour
 schedule.scheduleJob('0 * * * *', function() {
-    console.log('Hourly job run.');
-    // TODO: Save running config
+    communicator.saveConfig()
+        .catch(function(error) {
+            console.log('Error saving config.', error);
+        });
+
     // TODO: Update database based off switch
 });

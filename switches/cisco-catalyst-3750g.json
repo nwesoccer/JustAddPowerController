@@ -23,6 +23,16 @@
 
         "save-config": [
             "write"
+        ],
+
+        "clean-port": [
+            "configure terminal",
+            "default interface gigabitethernet 0/{port}",
+            "interface gigabitethernet 0/{port}",
+            "shutdown",
+            "exit",
+            "exit",
+            "write"
         ]
     }
 }
