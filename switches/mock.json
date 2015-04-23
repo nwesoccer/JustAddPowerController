@@ -1,0 +1,7 @@
+{
+    "commands": {
+        "setup-port": [ ],
+        "switch-port": [ ],
+        "save-config": [ ]
+    }
+}

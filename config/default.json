@@ -1,5 +1,5 @@
 {
-    "switch": "cisco-catalyst-3750g",
+    "switch": "mock",
 
     "connectionOptions": {
         "host": "",
@@ -8,5 +8,17 @@
         "password": "",
         "shellPrompt": "",
         "timeout": 86400000
+    },
+
+    "receivers": {
+        "minPort": 1,
+        "maxPort": 48
+    },
+
+    "transmitters": {
+        "minPort": 1,
+        "maxPort": 48,
+        "minVlan": 1,
+        "maxVlan": 48
     }
 }

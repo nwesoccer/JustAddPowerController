@@ -9,11 +9,8 @@ var database = {
         filename: appRoot.resolve('/database/transmitters.table'),
         autoload: true,
         onload: function(error) {
-            if (error) {
-                console.log('Error', error);
-            } else {
-                console.log('Transmitter database loaded.');
-            }
+            if (error) { console.log('Error', error); }
+            else { console.log('Transmitter database loaded.'); }
         }
     }),
 
@@ -21,15 +18,20 @@ var database = {
         filename: appRoot.resolve('/database/receivers.table'),
         autoload: true,
         onload: function(error) {
-            if (error) {
-                console.log('Error', error);
-            } else {
-                console.log('Receiver database loaded.');
-            }
+            if (error) { console.log('Error', error); }
+            else { console.log('Receiver database loaded.'); }
         }
     })
 
 };
+
+database.transmitters.ensureIndex({ fieldName: 'port', unique: true }, function (error) {
+    if (error) { console.log('Error', error); }
+});
+
+database.receivers.ensureIndex({ fieldName: 'port', unique: true }, function (error) {
+    if (error) { console.log('Error', error); }
+});
 
 database.insertTransmitter = q.nbind(database.transmitters.insert, database.transmitters);
 database.findTransmitter = q.nbind(database.transmitters.findOne, database.transmitters);

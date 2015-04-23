@@ -37,6 +37,8 @@ var ensureConnection = (function() {
 })();
 
 function executeCommandSequence(sequence, fieldMerger) {
+    fieldMerger = fieldMerger || function() { }
+
     return ensureConnection()
             .then(function(connection) {
                 var result = q();
@@ -73,6 +75,10 @@ module.exports = {
         return executeCommandSequence('setup-port', function(command) {
             return command.replace('{port}', port).replace('{vlan}', vlan)
         });
+    },
+
+    saveConfig: function() {
+        return executeCommandSequence('save-config');
     }
 
 };
