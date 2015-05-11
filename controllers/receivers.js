@@ -116,9 +116,6 @@ var receivers = {
         .catch(function(data) { handleErrors(res, data); });
 
         function validateRequest() {
-            var minPort = config.get('receivers.minPort');
-            var maxPort = config.get('receivers.maxPort');
-
             req.checkParams('id', 'id must be provided.').isInt();
             req.checkBody('transmitterId', 'TransmitterId cannot be empty.').optional().notEmpty();
             req.checkBody('name', 'Name cannot be empty.').optional().notEmpty();
@@ -166,9 +163,20 @@ var receivers = {
     },
 
     delete: function(req, res) {
-        // var id = req.params.id;
-        // data.splice(id, 1) // Spoof a DB call
-        // res.json(true);
+        db.findReceiver({ _id: parseInt(req.params.id) })
+            .then(function(receiver) {
+                if (!receiver) throw { status: 404, error: 'Receiver not found.' };
+                return receiver;
+            })
+            .then(function(receiver) {
+                return communicator.cleanPort(receiver.port)
+                    .then(function() { return receiver; });
+            })
+            .then(function(receiver) {
+                return db.deleteReceiver({ _id: receiver._id }, { });
+            })
+            .then(function() { res.status(204).end(); })
+            .catch(function(data) { handleErrors(res, data); });
     }
 };
 

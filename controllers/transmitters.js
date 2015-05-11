@@ -40,11 +40,6 @@ var transmitters = {
     },
 
     create: function(req, res) {
-        var minPort = config.get('transmitters.minPort');
-        var maxPort = config.get('transmitters.maxPort');
-        var minVlan = config.get('transmitters.minVlan');
-        var maxVlan = config.get('transmitters.maxVlan');
-
         q()
         .then(validateRequest)
         .then(addToSwitch)
@@ -53,6 +48,11 @@ var transmitters = {
         .catch(function(data) { handleErrors(res, data); });
 
         function validateRequest() {
+            var minPort = config.get('transmitters.minPort');
+            var maxPort = config.get('transmitters.maxPort');
+            var minVlan = config.get('transmitters.minVlan');
+            var maxVlan = config.get('transmitters.maxVlan');
+
             req.checkBody('_id', '_id must be provided.').isInt();
             req.checkBody('port', util.format('Port must be an integer between %d and %d.', minPort, maxPort)).isInt().gte(minPort).lte(maxPort);
             req.checkBody('vlan', 'Vlan must be an integer between %d and %d.', minVlan, maxVlan).isInt().gte(minVlan).lte(maxVlan);
@@ -80,24 +80,75 @@ var transmitters = {
         function addToDatabase() {
             return db.insertTransmitter({
                 _id: req.body._id,
-                name: req.body.name,
                 port: req.body.port,
-                vlan: req.body.vlan
+                vlan: req.body.vlan,
+                name: req.body.name,
+                ip: req.body.ip,
+                type: req.body.type,
+                room: req.body.room,
+                location: req.body.location,
+                connectedDevice: req.body.connectedDevice
             });
         }
     },
 
     update: function(req, res) {
-        // var updateTransmitter = req.body;
-        // var id = req.params.id;
-        // data[id] = updateTransmitter // Spoof a DB call
-        // res.json(updateTransmitter);
+        q()
+        .then(validateRequest)
+        .then(getCurrentTransmitter)
+        .then(updateDatabase)
+        .then(function(transmitter) { res.json(transmitter); })
+        .catch(function(data) { handleErrors(res, data); });
+
+        function validateRequest() {
+            req.checkParams('id', 'id must be provided.').isInt();
+            req.checkBody('name', 'Name cannot be empty.').optional().notEmpty();
+            req.checkBody('ip', 'Must specify valid IP.').optional().isIP();
+            req.checkBody('type', 'Must specify valid type.').optional().notEmpty();
+            req.checkBody('room', 'Must specify valid room.').optional().notEmpty();
+            req.checkBody('location', 'Must specify valid location.').optional().notEmpty();
+            req.checkBody('connectedDevice', 'Must specify valid connectedDevice.').optional().notEmpty();
+
+            var errors = req.validationErrors(true);
+            if (errors) throw { status: 400, errors: errors };
+        }
+
+        function getCurrentTransmitter() {
+            return db.findTransmitter({ _id: parseInt(req.params.id) })
+                .then(function(transmitter) {
+                    if (!transmitter) throw { status: 404, error: 'Transmitter not found.' };
+                    return transmitter;
+                });
+        }
+
+        function updateDatabase(transmitter) {
+            if (req.body.name) { transmitter.name = req.body.name; }
+            if (req.body.ip) { transmitter.ip = req.body.ip; }
+            if (req.body.type) { transmitter.type = req.body.type; }
+            if (req.body.room) { transmitter.room = req.body.room; }
+            if (req.body.location) { transmitter.location = req.body.location; }
+            if (req.body.connectedDevice) { transmitter.connectedDevice = req.body.connectedDevice; }
+
+            return db.updateTransmitter({ _id: transmitter._id }, transmitter)
+                .then(function(){ return transmitter; });
+        }
     },
 
     delete: function(req, res) {
-        // var id = req.params.id;
-        // data.splice(id, 1) // Spoof a DB call
-        // res.json(true);
+        db.findTransmitter({ _id: parseInt(req.params.id) })
+            .then(function(transmitter) {
+                if (!transmitter) throw { status: 404, error: 'Transmitter not found.' };
+                return transmitter;
+            })
+            .then(function(transmitter) {
+                return communicator.cleanPort(transmitter.port)
+                    .then(function() { return transmitter; });
+            })
+            .then(function(transmitter) {
+                return db.deleteTransmitter({ _id: transmitter._id }, { });
+            })
+            .then(function() { res.status(204).end(); })
+            .catch(function(data) { handleErrors(res, data); });
     }
 };
 
