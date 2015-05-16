@@ -1,64 +1,63 @@
 var appRoot = require('app-root-path');
 var config = require('config');
 var q = require('q');
-var telnet = require('telnet-client');
+var SSH = require('ssh2').Client;
 
 var connectionOptions = config.get('connectionOptions');
 var switchOptions = appRoot.require('/switches/' + config.get('switch') + '.json');
 
-var ensureConnection = (function() {
-    var connection = null;
-
-    return function() {
-        var deferred = q.defer();
-
-        if (connection == null) {
-            connection = new telnet();
-
-            connection.on('ready', function() {
-                deferred.resolve(connection);
-            });
-
-            connection.on('timeout', function() {
-                connection.end();
-            });
-
-            connection.on('end', function() {
-                connection = null;
-            });
-
-            connection.connect(connectionOptions);
-        } else {
-            deferred.resolve(connection);
-        }
-
-        return deferred.promise;
-    };
-})();
-
 function executeCommandSequence(sequence, fieldMerger) {
-    fieldMerger = fieldMerger || function() { }
+    fieldMerger = fieldMerger || function(command) { return command; }
 
-    return ensureConnection()
-            .then(function(connection) {
-                var result = q();
+    var deferred = q.defer();
 
-                switchOptions.commands[sequence].forEach(function(command) {
-                    result = result.then(function() {
-                        return executeCommand(connection, fieldMerger(command));
+    var ssh = new SSH();
+
+    ssh.on('ready', function() {
+        console.log('ready');
+
+        var commandFunctions = [];
+
+        switchOptions.commands[sequence].forEach(function(command) {
+            commandFunctions.push(function() {
+                var deferred = q.defer();
+
+                ssh.exec(fieldMerger(command), function(error, stream) {
+                    if (error) {
+                        console.log('rejected');
+                        deferred.reject(error);
+                        return;
+                    } else {
+                        console.log('resolved');
+                        deferred.resolve();
+                    }
+
+                    stream.on('data', function(data) {
+                        console.log('DATA: ' + data);
+                    }).stderr.on('data', function(data) {
+                        console.log('ERROR: ' + data);
                     });
                 });
 
-                return result;
+                return deferred.promise;
             });
-}
+        });
 
-function executeCommand(connection, command) {
-    var deferred = q.defer();
+        commandFunctions.reduce(q.when, q())
+            .then(function() {
+                console.log('resolved');
+                deferred.resolve();
+            })
+            .catch(function(error) {
+                console.log('rejected:' + error);
+                deferred.reject(error);
+            })
+            .finally(function() {
+                console.log('finally');
+                ssh.end();
+            });
 
-    connection.exec(command, connectionOptions, function(result) {
-        deferred.resolve(result);
-    });
+    }).connect(connectionOptions);
 
     return deferred.promise;
 }
@@ -85,6 +84,10 @@ module.exports = {
         return executeCommandSequence('clean-port', function(command) {
             return command.replace('{port}', port);
         });
+    },
+
+    testSSH: function() {
+        return executeCommandSequence('test-ssh');
     }
 
 };
