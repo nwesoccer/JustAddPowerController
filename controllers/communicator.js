@@ -1,7 +1,7 @@
 var appRoot = require('app-root-path');
 var config = require('config');
 var q = require('q');
-var SSH = require('ssh2').Client;
+var SSH = require('ssh2shell');
 
 var connectionOptions = config.get('connectionOptions');
 var switchOptions = appRoot.require('/switches/' + config.get('switch') + '.json');
@@ -11,53 +11,24 @@ function executeCommandSequence(sequence, fieldMerger) {
 
     var deferred = q.defer();
 
-    var ssh = new SSH();
+    var options = {
+        server: connectionOptions,
+        commands: switchOptions.commands[sequence].map(fieldMerger)
+    };
 
-    ssh.on('ready', function() {
-        console.log('ready');
+    var ssh = new SSH(options);
 
-        var commandFunctions = [];
+    ssh.standardPromt = new RegExp('#$', 'i');
 
-        switchOptions.commands[sequence].forEach(function(command) {
-            commandFunctions.push(function() {
-                var deferred = q.defer();
+    ssh.on('error', function onError(error, type, close, callback) {
+        deferred.reject(error);
+    });
 
-                ssh.exec(fieldMerger(command), function(error, stream) {
-                    if (error) {
-                        console.log('rejected');
-                        deferred.reject(error);
-                        return;
-                    } else {
-                        console.log('resolved');
-                        deferred.resolve();
-                    }
+    ssh.on('end', function() {
+        deferred.resolve();
+    });
 
-                    stream.on('data', function(data) {
-                        console.log('DATA: ' + data);
-                    }).stderr.on('data', function(data) {
-                        console.log('ERROR: ' + data);
-                    });
-                });
-
-                return deferred.promise;
-            });
-        });
-
-        commandFunctions.reduce(q.when, q())
-            .then(function() {
-                console.log('resolved');
-                deferred.resolve();
-            })
-            .catch(function(error) {
-                console.log('rejected:' + error);
-                deferred.reject(error);
-            })
-            .finally(function() {
-                console.log('finally');
-                ssh.end();
-            });
-
-    }).connect(connectionOptions);
+    ssh.connect();
 
     return deferred.promise;
 }
