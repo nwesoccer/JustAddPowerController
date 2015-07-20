@@ -55,10 +55,6 @@ module.exports = {
         return executeCommandSequence('clean-port', function(command) {
             return command.replace('{port}', port);
         });
-    },
-
-    testSSH: function() {
-        return executeCommandSequence('test-ssh');
     }
 
 };

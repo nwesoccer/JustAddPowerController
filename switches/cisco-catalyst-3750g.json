@@ -41,13 +41,6 @@
             "exit",
             "write",
             "exit"
-        ],
-
-        "test-ssh": [
-            "enable",
-            "configure terminal",
-            "exit",
-            "exit"
         ]
     }
 }
