@@ -6,14 +6,12 @@ var SSH = require('ssh2shell');
 var connectionOptions = config.get('connectionOptions');
 var switchOptions = appRoot.require('/switches/' + config.get('switch') + '.json');
 
-function executeCommandSequence(sequence, fieldMerger) {
-    fieldMerger = fieldMerger || function(command) { return command; }
-
+function executeCommands(commands) {
     var deferred = q.defer();
 
     var options = {
         server: connectionOptions,
-        commands: switchOptions.commands[sequence].map(fieldMerger)
+        commands: commands
     };
 
     var ssh = new SSH(options);
@@ -35,26 +33,38 @@ function executeCommandSequence(sequence, fieldMerger) {
 
 module.exports = {
 
-    switchPort: function(port, vlan) {
-        return executeCommandSequence('switch-port', function(command) {
-            return command.replace('{port}', port).replace('{vlan}', vlan);
+    switchPorts: function(ports, vlan) {
+        var sequence = switchOptions.commands['switch-ports'];
+        var commands = [];
+
+        var commands = commands.concat(sequence.before);
+
+        ports.forEach(function(port) {
+            commands = commands.concat(sequence.do.map(function(command) {
+                return command.replace('{port}', port).replace('{vlan}', vlan);
+            }));
         });
+
+        commands = commands.concat(sequence.after);
+
+        return q();
+        return executeCommands(commands);
     },
 
     setupPort: function(port, vlan) {
-        return executeCommandSequence('setup-port', function(command) {
+        return executeCommands(switchOptions.commands['setup-port'].map(function(command) {
             return command.replace('{port}', port).replace('{vlan}', vlan);
-        });
+        }));
     },
 
     saveConfig: function() {
-        return executeCommandSequence('save-config');
+        return executeCommands(switchOptions.commands['save-config']);
     },
 
     cleanPort: function(port) {
-        return executeCommandSequence('clean-port', function(command) {
-            return command.replace('{port}', port);
-        });
+        return executeCommands(switchOptions.commands['clean-port'].map(function(command) {
+            return command.replace('{port}', port)
+        }));
     }
 
 };

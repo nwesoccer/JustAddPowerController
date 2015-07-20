@@ -18,6 +18,15 @@ app.use(expressValidator({
         },
         lte: function(param, num) {
             return param <= num;
+        },
+        isArrayOfInts: function(param) {
+            if (typeof param !== "string") return false;
+
+            var ints = param.split(",");
+
+            return ints.every(function(value){
+                return !isNaN(value);
+            });
         }
     }
 }));

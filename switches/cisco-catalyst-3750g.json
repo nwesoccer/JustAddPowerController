@@ -15,15 +15,21 @@
             "exit"
         ],
 
-        "switch-port": [
-            "enable",
-            "configure terminal",
-            "interface gigabitethernet 0/{port}",
-            "switchport access vlan {vlan}",
-            "exit",
-            "exit",
-            "exit"
-        ],
+        "switch-ports": {
+            "before": [
+                "enable",
+                "configure terminal"
+            ],
+            "do": [
+                "interface gigabitethernet 0/{port}",
+                "switchport access vlan {vlan}",
+                "exit"
+            ],
+            "after": [
+                "exit",
+                "exit"
+            ]
+        },
 
         "save-config": [
             "enable",

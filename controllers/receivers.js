@@ -109,14 +109,14 @@ var receivers = {
     update: function(req, res) {
         q()
         .then(validateRequest)
-        .then(getCurrentReceiver)
+        .then(getCurrentReceivers)
         .then(updateSwitch)
         .then(updateDatabase)
-        .then(function(receiver) { res.json(receiver); })
+        .then(function(receivers) { res.json(receivers); })
         .catch(function(data) { handleErrors(res, data); });
 
         function validateRequest() {
-            req.checkParams('id', 'id must be provided.').isInt();
+            req.checkParams('id', 'valid list of ids must be provided.').isArrayOfInts();
             req.checkBody('transmitterId', 'TransmitterId cannot be empty.').optional().notEmpty();
             req.checkBody('name', 'Name cannot be empty.').optional().notEmpty();
             req.checkBody('ip', 'Must specify valid IP.').optional().isIP();
@@ -129,36 +129,53 @@ var receivers = {
             if (errors) throw { status: 400, errors: errors };
         }
 
-        function getCurrentReceiver() {
-            return db.findReceiver({ _id: parseInt(req.params.id) })
-                .then(function(receiver) {
-                    if (!receiver) throw { status: 404, error: 'Receiver not found.' };
-                    return receiver;
+        function getCurrentReceivers() {
+            var ids = req.params.id.split(",").map(Number);
+
+            return db.findReceivers({ "_id": { $in: ids } })
+                .then(function(receivers) {
+                    if (!receivers || receivers.length !== ids.length) throw { status: 404, error: 'Receiver not found.' };
+                    return receivers;
                 });
         }
 
-        function updateSwitch(receiver) {
-            if (receiver.transmitterId === req.body.transmitterId) { return receiver; }
+        function updateSwitch(receivers) {
+            if (!req.body.transmitterId) return receivers;
+
+            var receiversToSwitch = receivers.filter(function(receiver) {
+                return receiver.transmitterId !== req.body.transmitterId;
+            });
+
+            if (receiversToSwitch.length === 0) return receivers;
 
             return db.findTransmitter({ _id: req.body.transmitterId })
                 .then(function(transmitter) {
                     if (!transmitter) throw { status: 404, error: 'Transmitter not found.' };
-                    return communicator.switchPort(receiver.port, transmitter.vlan);
+                    return communicator.switchPorts(receiversToSwitch.map(function(receiver) { return receiver.port; }), transmitter.vlan);
                 })
-                .then(function() { return receiver; });
+                .then(function() { return receivers; });
         }
 
-        function updateDatabase(receiver) {
-            if (req.body.transmitterId) { receiver.transmitterId = req.body.transmitterId; }
-            if (req.body.name) { receiver.name = req.body.name; }
-            if (req.body.ip) { receiver.ip = req.body.ip; }
-            if (req.body.type) { receiver.type = req.body.type; }
-            if (req.body.room) { receiver.room = req.body.room; }
-            if (req.body.location) { receiver.location = req.body.location; }
-            if (req.body.connectedDevice) { receiver.connectedDevice = req.body.connectedDevice; }
+        function updateDatabase(receivers) {
+            var promise = q();
 
-            return db.updateReceiver({ _id: receiver._id }, receiver)
-                .then(function() { return receiver; });
+            receivers.forEach(function(receiver) {
+                if (req.body.transmitterId) { receiver.transmitterId = req.body.transmitterId; }
+                if (req.body.name) { receiver.name = req.body.name; }
+                if (req.body.ip) { receiver.ip = req.body.ip; }
+                if (req.body.type) { receiver.type = req.body.type; }
+                if (req.body.room) { receiver.room = req.body.room; }
+                if (req.body.location) { receiver.location = req.body.location; }
+                if (req.body.connectedDevice) { receiver.connectedDevice = req.body.connectedDevice; }
+
+                promise = promise.then(function() {
+                    return db.updateReceiver({ _id: receiver._id }, receiver);
+                }) ;
+            });
+            
+            promise = promise.then(function() { return receivers; });
+
+            return promise;
         }
     },
 
