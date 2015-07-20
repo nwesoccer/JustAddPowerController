@@ -3,11 +3,8 @@
 
     "connectionOptions": {
         "host": "",
-        "port": 23,
         "username": "",
-        "password": "",
-        "shellPrompt": "",
-        "timeout": 86400000
+        "password": ""
     },
 
     "receivers": {

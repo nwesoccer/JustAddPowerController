@@ -1,6 +1,7 @@
 {
     "commands": {
         "setup-port": [
+            "enable",
             "configure terminal",
             "interface gigabitethernet 0/{port}",
             "switchport mode access",
@@ -10,29 +11,36 @@
             "switchport access vlan {vlan}",
             "exit",
             "exit",
-            "write"
+            "write",
+            "exit"
         ],
 
         "switch-port": [
+            "enable",
             "configure terminal",
             "interface gigabitethernet 0/{port}",
             "switchport access vlan {vlan}",
+            "exit",
             "exit",
             "exit"
         ],
 
         "save-config": [
-            "write"
+            "enable",
+            "write",
+            "exit"
         ],
 
         "clean-port": [
+            "enable",
             "configure terminal",
             "default interface gigabitethernet 0/{port}",
             "interface gigabitethernet 0/{port}",
             "shutdown",
             "exit",
             "exit",
-            "write"
+            "write",
+            "exit"
         ]
     }
 }
