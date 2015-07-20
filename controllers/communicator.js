@@ -46,8 +46,7 @@ module.exports = {
         });
 
         commands = commands.concat(sequence.after);
-
-        return q();
+        
         return executeCommands(commands);
     },
 
