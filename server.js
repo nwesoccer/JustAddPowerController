@@ -57,9 +57,10 @@ app.listen(port);
 // Save switch running-config to startup-config every hour
 schedule.scheduleJob('0 * * * *', function() {
     communicator.saveConfig()
+        .then(function() {
+            console.log("Switch config saved.");
+        })
         .catch(function(error) {
             console.log('Error saving config.', error);
         });
-
-    // TODO: Update database based off switch
 });
