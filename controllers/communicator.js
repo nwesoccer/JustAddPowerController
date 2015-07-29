@@ -41,7 +41,7 @@ module.exports = {
 
         ports.forEach(function(port) {
             commands = commands.concat(sequence.do.map(function(command) {
-                return command.replace('{port}', port).replace('{vlan}', vlan);
+                return command.replace('{port}', port).replace('{primary-vlan}', '2204').replace('{sub-vlan}', vlan);
             }));
         });
 

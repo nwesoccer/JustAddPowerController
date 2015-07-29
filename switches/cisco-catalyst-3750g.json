@@ -22,7 +22,7 @@
             ],
             "do": [
                 "interface gigabitethernet 0/{port}",
-                "switchport access vlan {vlan}",
+                "switchport private-vlan host-association {primary-vlan} {sub-vlan}",
                 "exit"
             ],
             "after": [
