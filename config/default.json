@@ -1,9 +1,11 @@
 {
     "switch": "mock",
 
+    "primaryVlan": 10,
+
     "connectionOptions": {
         "host": "",
-        "username": "",
+        "userName": "",
         "password": ""
     },
 

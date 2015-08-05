@@ -3,6 +3,8 @@
         "setup-port": [ ],
         "switch-port": [ ],
         "save-config": [ ],
-        "clean-port": [ ]
+        "clean-port": [ ],
+        "enable-port": [ ],
+        "disable-port": [ ]
     }
 }

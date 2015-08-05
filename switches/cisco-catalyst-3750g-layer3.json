@@ -4,11 +4,11 @@
             "enable",
             "configure terminal",
             "interface gigabitethernet 0/{port}",
-            "switchport mode access",
+            "switchport mode ????????",
             "no shutdown",
             "spanning-tree portfast",
             "power inline auto",
-            "switchport access vlan {vlan}",
+            "switchport private-vlan host-association {primary-vlan} {sub-vlan}",
             "exit",
             "exit",
             "write",
@@ -22,7 +22,7 @@
             ],
             "do": [
                 "interface gigabitethernet 0/{port}",
-                "switchport access vlan {vlan}",
+                "switchport private-vlan host-association {primary-vlan} {sub-vlan}",
                 "exit"
             ],
             "after": [

@@ -62,6 +62,7 @@ var transmitters = {
             req.checkBody('room', 'Must specify valid room.').optional().notEmpty();
             req.checkBody('location', 'Must specify valid location.').optional().notEmpty();
             req.checkBody('connectedDevice', 'Must specify valid connectedDevice.').optional().notEmpty();
+            req.checkBody('purpose', 'Must specify valid purpose.').optional().notEmpty();
 
             var errors = req.validationErrors(true);
             if (errors) throw { status: 400, errors: errors };
@@ -87,7 +88,8 @@ var transmitters = {
                 type: req.body.type,
                 room: req.body.room,
                 location: req.body.location,
-                connectedDevice: req.body.connectedDevice
+                connectedDevice: req.body.connectedDevice,
+                purpose: req.body.purpose
             });
         }
     },
@@ -108,6 +110,7 @@ var transmitters = {
             req.checkBody('room', 'Must specify valid room.').optional().notEmpty();
             req.checkBody('location', 'Must specify valid location.').optional().notEmpty();
             req.checkBody('connectedDevice', 'Must specify valid connectedDevice.').optional().notEmpty();
+            req.checkBody('purpose', 'Must specify valid purpose.').optional().notEmpty();
 
             var errors = req.validationErrors(true);
             if (errors) throw { status: 400, errors: errors };
@@ -128,6 +131,7 @@ var transmitters = {
             if (req.body.room) { transmitter.room = req.body.room; }
             if (req.body.location) { transmitter.location = req.body.location; }
             if (req.body.connectedDevice) { transmitter.connectedDevice = req.body.connectedDevice; }
+            if (req.body.purpose) { transmitter.purpose = req.body.purpose; }
 
             return db.updateTransmitter({ _id: transmitter._id }, transmitter)
                 .then(function(){ return transmitter; });
