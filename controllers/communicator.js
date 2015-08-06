@@ -5,6 +5,7 @@ var SSH = require('ssh2shell');
 
 var connectionOptions = config.get('connectionOptions');
 var switchOptions = appRoot.require('/switches/' + config.get('switch') + '.json');
+var primaryVlan = config.get('primaryVlan');
 
 function executeCommands(commands) {
     var deferred = q.defer();
@@ -41,7 +42,7 @@ module.exports = {
 
         ports.forEach(function(port) {
             commands = commands.concat(sequence.do.map(function(command) {
-                return command.replace('{port}', port).replace('{primary-vlan}', switchOptions.primaryVlan).replace('{sub-vlan}', vlan);
+                return command.replace('{port}', port).replace('{primary-vlan}', primaryVlan).replace('{sub-vlan}', vlan);
             }));
         });
 
