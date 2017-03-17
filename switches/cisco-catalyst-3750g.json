@@ -1,0 +1,72 @@
+{
+    "commands": {
+        "setup-port": [
+            "enable",
+            "configure terminal",
+            "interface gigabitethernet 0/{port}",
+            "switchport mode access",
+            "no shutdown",
+            "spanning-tree portfast",
+            "power inline auto",
+            "switchport access vlan {vlan}",
+            "exit",
+            "exit",
+            "write",
+            "exit"
+        ],
+
+        "switch-ports": {
+            "before": [
+                "enable",
+                "configure terminal"
+            ],
+            "do": [
+                "interface gigabitethernet 0/{port}",
+                "switchport access vlan {vlan}",
+                "exit"
+            ],
+            "after": [
+                "exit",
+                "exit"
+            ]
+        },
+
+        "save-config": [
+            "enable",
+            "write",
+            "exit"
+        ],
+
+        "clean-port": [
+            "enable",
+            "configure terminal",
+            "default interface gigabitethernet 0/{port}",
+            "interface gigabitethernet 0/{port}",
+            "shutdown",
+            "exit",
+            "exit",
+            "write",
+            "exit"
+        ],
+
+        "enable-port": [
+            "enable",
+            "configure terminal",
+            "interface gigabitethernet 0/{port}",
+            "no shutdown",
+            "exit",
+            "exit",
+            "exit"
+        ],
+
+        "disable-port": [
+            "enable",
+            "configure terminal",
+            "interface gigabitethernet 0/{port}",
+            "shutdown",
+            "exit",
+            "exit",
+            "exit"
+        ]
+    }
+}
