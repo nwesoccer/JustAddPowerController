@@ -1,0 +1,10 @@
+{
+    "commands": {
+        "setup-port": [ ],
+        "switch-port": [ ],
+        "save-config": [ ],
+        "clean-port": [ ],
+        "enable-port": [ ],
+        "disable-port": [ ]
+    }
+}

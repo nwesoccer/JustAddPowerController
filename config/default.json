@@ -1,0 +1,23 @@
+{
+    "switch": "mock",
+
+    "primaryVlan": 10,
+
+    "connectionOptions": {
+        "host": "",
+        "userName": "",
+        "password": ""
+    },
+
+    "receivers": {
+        "minPort": 1,
+        "maxPort": 48
+    },
+
+    "transmitters": {
+        "minPort": 1,
+        "maxPort": 48,
+        "minVlan": 1,
+        "maxVlan": 48
+    }
+}
