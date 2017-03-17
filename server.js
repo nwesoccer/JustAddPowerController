@@ -1,12 +1,41 @@
-var express    = require('express');
-var app        = express();
+var appRoot      = require('app-root-path');
 var bodyParser = require('body-parser');
+var schedule = require('node-schedule');
+var express    = require('express');
+var expressValidator = require('express-validator');
+var app        = express();
 
-var transmitters = require('./transmitters.js');
-var receivers = require('./receivers.js');
+var communicator = appRoot.require('/controllers/communicator.js');
+var transmitters = appRoot.require('/controllers/transmitters.js');
+var receivers = appRoot.require('/controllers/receivers.js');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(expressValidator({
+    customValidators: {
+        gte: function(param, num) {
+            return param >= num;
+        },
+        lte: function(param, num) {
+            return param <= num;
+        },
+        isArrayOfInts: function(param) {
+            if (typeof param !== "string") return false;
+
+            var ints = param.split(",");
+
+            return ints.every(function(value){
+                return !isNaN(value);
+            });
+        }
+    }
+}));
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
 
 var port = process.env.PORT || 8080;
 var router = express.Router();
@@ -17,6 +46,7 @@ router.get('/', function(req, res) {
 
 router.get('/transmitters', transmitters.getAll);
 router.get('/transmitters/:id', transmitters.getOne);
+router.get('/transmitters/:id/receivers', receivers.getForTransmitter);
 router.post('/transmitters', transmitters.create);
 router.put('/transmitters/:id', transmitters.update);
 router.delete('/transmitters/:id', transmitters.delete);
@@ -27,7 +57,16 @@ router.post('/receivers', receivers.create);
 router.put('/receivers/:id', receivers.update);
 router.delete('/receivers/:id', receivers.delete);
 
-
 app.use('', router);
 app.listen(port);
-console.log('API on port ' + port);
+
+// Save switch running-config to startup-config every hour
+schedule.scheduleJob('0 * * * *', function() {
+    communicator.saveConfig()
+        .then(function() {
+            console.log("Switch config saved.");
+        })
+        .catch(function(error) {
+            console.log('Error saving config.', error);
+        });
+});
